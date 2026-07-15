@@ -1,11 +1,18 @@
 [
-  { "name": "محمود",  "joinYear": 2021, "interest": ["أنمي","ألعاب","كرة قدم"],       "favorite": ["One Punch Man","Persona","Real Madrid"],               "chatActivity": "متفاعل",   "status": "نشط" },
-  { "name": "مؤمن",   "joinYear": 2020, "interest": ["أنمي","ألعاب"],                  "favorite": ["One Piece","Terraria"],                                "chatActivity": "متفاعل",   "status": "نشط" },
-  { "name": "فيلو",   "joinYear": 2020, "interest": ["أنمي","ألعاب"],                  "favorite": ["Naruto","Terraria"],                                   "chatActivity": "متفاعل",   "status": "نشط" },
-  { "name": "مازن",   "joinYear": 2020, "interest": ["أنمي","ألعاب","كرة قدم"],       "favorite": ["Hunter x Hunter","Rocket League","Manchester United"], "chatActivity": "أحياناً",   "status": "نشط" },
-  { "name": "عزو",  "joinYear": 2020, "interest": ["أنمي","ألعاب","مسلسلات","أفلام"], "favorite": ["JoJo","League of Legends"],                            "chatActivity": "متفاعل",   "status": "نشط" },
-  { "name": "يسبجا",  "joinYear": 2020, "interest": ["أنمي","ألعاب","مسلسلات"],        "favorite": ["JoJo","Bloodborne"],                                   "chatActivity": "متفاعل",   "status": "نشط" },
-  { "name": "يوكينيا", "joinYear": 2020, "interest": ["أنمي","ألعاب"],                 "favorite": ["Bungou Stray Dogs"],                                   "chatActivity": "متفاعل",   "status": "غادر" },
-  { "name": "سفاري", "joinYear": 2021, "interest": ["أنمي","ألعاب"],                 "favorite": ["The House in Fata Morgana"],                           "chatActivity": "متفاعل",   "status": "غادر" },
-  { "name": "زبادي",  "joinYear": 2020, "interest": ["أنمي","ألعاب","مسلسلات"],        "favorite": ["Minecraft"],                                           "chatActivity": "غير نشط", "status": "نشط" }
+  { "name": "محمود",    "joinYear": 2021, "interest": ["أنمي","ألعاب","كرة قدم"],       "favorite": ["One Punch Man","Persona","Real Madrid"],               "chatActivity": "متفاعل",   "status": "نشط" },
+  { "name": "مؤمن",     "joinYear": 2020, "interest": ["أنمي","ألعاب"],                  "favorite": ["One Piece","Terraria"],                                "chatActivity": "متفاعل",   "status": "نشط" },
+  { "name": "فيلو",     "joinYear": 2020, "interest": ["أنمي","ألعاب"],                  "favorite": ["Naruto","Terraria"],                                   "chatActivity": "متفاعل",   "status": "نشط" },
+  { "name": "مازن",     "joinYear": 2020, "interest": ["أنمي","ألعاب","كرة قدم"],       "favorite": ["Hunter x Hunter","Rocket League","Manchester United"], "chatActivity": "أحياناً",   "status": "نشط" },
+  { "name": "عزو",    "joinYear": 2020, "interest": ["أنمي","ألعاب","مسلسلات","أفلام"], "favorite": ["JoJo","League of Legends"],                            "chatActivity": "متفاعل",   "status": "نشط" },
+  { "name": "يسبجا",    "joinYear": 2020, "interest": ["أنمي","ألعاب","مسلسلات"],        "favorite": ["JoJo","Bloodborne"],                                   "chatActivity": "متفاعل",   "status": "نشط" },
+  { "name": "يوكينيا",   "joinYear": 2020, "interest": ["أنمي","ألعاب"],                 "favorite": ["Bungou Stray Dogs"],                                   "chatActivity": "متفاعل",   "status": "غادر" },
+  { "name": "سفاري",   "joinYear": 2021, "interest": ["أنمي","ألعاب"],                 "favorite": ["The House in Fata Morgana"],                           "chatActivity": "متفاعل",   "status": "غادر" },
+  { "name": "زبادي",    "joinYear": 2020, "interest": ["أنمي","ألعاب","مسلسلات"],        "favorite": ["Minecraft"],                                           "chatActivity": "غير نشط", "status": "نشط" },
+  { "name": "سراج",     "joinYear": 2023, "interest": ["أنمي","ألعاب"],                  "favorite": ["JoJo","Dead Cells"],                                   "chatActivity": "متفاعل",   "status": "محظور" },
+  { "name": "أمين",     "joinYear": 2020, "interest": ["أنمي","ألعاب"],                  "favorite": ["Getting Over It"],                                     "chatActivity": "أحياناً",   "status": "نشط" },
+  { "name": "إكرام",    "joinYear": 2023, "interest": ["أنمي","ألعاب"],                  "favorite": ["Honkai: Star Rail"],                                   "chatActivity": "متفاعل",   "status": "نشط" },
+  { "name": "عبدالحكيم", "joinYear": 2020, "interest": ["أنمي","ألعاب"],                 "favorite": ["Rocket League"],                                       "chatActivity": "غير نشط", "status": "نشط" },
+  { "name": "فوكسي",    "joinYear": 2020, "interest": ["أنمي","ألعاب"],                  "favorite": ["Unknown"],                                             "chatActivity": "متفاعل",   "status": "محظور" },
+  { "name": "نايف",     "joinYear": 2024, "interest": ["أنمي","ألعاب"],                  "favorite": ["Unknown"],                                             "chatActivity": "غير نشط", "status": "نشط" },
+  { "name": "اكسط",     "joinYear": 2020, "interest": ["أنمي","ألعاب"],                  "favorite": ["Cyberpunk: Edgerunners","Rocket League"],              "chatActivity": "أحياناً",   "status": "نشط" }
 ]
