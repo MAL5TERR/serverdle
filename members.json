@@ -1,0 +1,11 @@
+[
+  { "name": "Mahmoud", "joinYear": 2021, "interest": ["Anime","Gaming","Football"], "favorite": ["One Punch Man","Persona","Real Madrid"], "chatActivity": "Active",     "status": "Active" },
+  { "name": "Moamen",  "joinYear": 2020, "interest": ["Anime","Gaming"],            "favorite": ["One Piece","Terraria"],                "chatActivity": "Active",     "status": "Active" },
+  { "name": "fylo",    "joinYear": 2020, "interest": ["Anime","Gaming"],            "favorite": ["Naruto","Terraria"],                   "chatActivity": "Active",     "status": "Active" },
+  { "name": "Mazen",   "joinYear": 2020, "interest": ["Anime","Gaming","Football"], "favorite": ["Hunter x Hunter","Rocket League","Manchester United"], "chatActivity": "Occasional", "status": "Active" },
+  { "name": "Sbero",   "joinYear": 2020, "interest": ["Anime","Gaming","Series","Movie"], "favorite": ["JoJo","League of Legends"],       "chatActivity": "Active",     "status": "Active" },
+  { "name": "ysbja",   "joinYear": 2020, "interest": ["Anime","Gaming","Series"],   "favorite": ["JoJo","Bloodborne"],                   "chatActivity": "Active",     "status": "Active" },
+  { "name": "yukinia", "joinYear": 2020, "interest": ["Anime","Gaming"],            "favorite": ["Bungou Stray Dogs"],                   "chatActivity": "Active",     "status": "Left"   },
+  { "name": "sevarya", "joinYear": 2021, "interest": ["Anime","Gaming"],            "favorite": ["The House in Fata Morgana"],           "chatActivity": "Active",     "status": "Left"   },
+  { "name": "zbady",   "joinYear": 2020, "interest": ["Anime","Gaming","Series"],   "favorite": ["Minecraft"],                           "chatActivity": "Inactive",   "status": "Active" }
+]
