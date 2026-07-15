@@ -10,11 +10,48 @@ const MAX_ATTEMPTS = 5;
 const STORAGE_KEY = "serverdle_state_v1";
 const NAME_KEY = "mafiadle_username";
 
-// URL of your hosted Mafiadle bot (see mafiadle-bot/README.md), e.g. "https://your-bot.up.railway.app"
-// Leave as-is to disable sending results.
-const BOT_API_URL = "PASTE_YOUR_BOT_URL_HERE";
-// Must match API_SECRET in the bot's .env — stops randoms from posting fake results.
-const BOT_API_SECRET = "PASTE_YOUR_SHARED_SECRET_HERE";
+/* ============================================================
+   1b. FIREBASE CONFIG
+   Paste your Firebase project's config below (Project settings →
+   General → Your apps → SDK setup and configuration → Config).
+   Leave apiKey as-is to disable all Firestore reads/writes.
+   ============================================================ */
+const FIREBASE_CONFIG = {
+  apiKey: "PASTE_YOUR_API_KEY_HERE",
+  authDomain: "PASTE_YOUR_PROJECT.firebaseapp.com",
+  projectId: "PASTE_YOUR_PROJECT_ID",
+  storageBucket: "PASTE_YOUR_PROJECT.appspot.com",
+  messagingSenderId: "PASTE_YOUR_SENDER_ID",
+  appId: "PASTE_YOUR_APP_ID"
+};
+
+// Optional: Discord webhook URL (Server Settings → Integrations → Webhooks).
+// Leave as-is to disable posting results to Discord. This is independent
+// of Firestore — you can use either, both, or neither.
+const DISCORD_WEBHOOK_URL = "PASTE_YOUR_DISCORD_WEBHOOK_URL_HERE";
+
+let db = null;
+let firebaseReady = false;
+
+function firebaseConfigured(){
+  return FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.indexOf('PASTE_YOUR') === -1;
+}
+
+function discordConfigured(){
+  return DISCORD_WEBHOOK_URL && DISCORD_WEBHOOK_URL.indexOf('PASTE_YOUR') === -1;
+}
+
+function initFirebase(){
+  if(!firebaseConfigured()) return;
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    firebaseReady = true;
+  }catch(e){
+    console.error('Failed to init Firebase', e);
+    firebaseReady = false;
+  }
+}
 
 let dayIndex, answerIndex, answer;
 let state;
@@ -86,10 +123,6 @@ function getTodayDateStr(){
   return new Date(idx * DAY_MS).toISOString().slice(0, 10);
 }
 
-function apiConfigured(){
-  return BOT_API_URL && BOT_API_URL.indexOf('PASTE_YOUR') === -1;
-}
-
 function openModal(modal){ modal.classList.add('show'); }
 function closeModal(modal){ modal.classList.remove('show'); }
 
@@ -109,25 +142,48 @@ function renderLoading(container){
   container.innerHTML = '<p class="modal-loading">جارِ التحميل...</p>';
 }
 
-function renderError(container){
-  container.innerHTML = '<p class="modal-error">تعذّر تحميل البيانات. تأكد أن رابط البوت مضبوط بشكل صحيح.</p>';
+function renderErrorMsg(container){
+  container.innerHTML = '<p class="modal-error">تعذّر تحميل البيانات. تأكد أن إعدادات Firebase مضبوطة بشكل صحيح.</p>';
 }
 
 async function openLeaderboard(){
   openModal(leaderboardModal);
-  if(!apiConfigured()){
-    leaderboardBody.innerHTML = '<p class="modal-error">لم يتم ربط الموقع بالبوت بعد.</p>';
+  if(!firebaseConfigured() || !firebaseReady){
+    leaderboardBody.innerHTML = '<p class="modal-error">لم يتم ربط الموقع بقاعدة البيانات بعد.</p>';
     return;
   }
   renderLoading(leaderboardBody);
   try{
-    const res = await fetch(BOT_API_URL.replace(/\/$/, '') + '/api/leaderboard');
-    if(!res.ok) throw new Error('bad response');
-    const board = await res.json();
+    const snap = await db.collection('results').get();
+
+    // Aggregate per-user stats client-side from every stored result doc.
+    const stats = {};
+    snap.forEach(doc => {
+      const r = doc.data();
+      if(!r.username) return;
+      if(!stats[r.username]){
+        stats[r.username] = { username: r.username, played: 0, wins: 0, totalAttempts: 0 };
+      }
+      const s = stats[r.username];
+      s.played += 1;
+      if(r.won){
+        s.wins += 1;
+        s.totalAttempts += (r.attemptsUsed || 0);
+      }
+    });
+
+    const board = Object.values(stats).map(s => ({
+      username: s.username,
+      played: s.played,
+      wins: s.wins,
+      winRate: s.played ? Math.round((s.wins / s.played) * 100) : 0,
+      avgAttempts: s.wins ? (s.totalAttempts / s.wins).toFixed(1) : null
+    })).sort((a, b) => b.winRate - a.winRate || b.played - a.played);
+
     renderLeaderboard(board);
   }catch(e){
     console.error('Failed to load leaderboard', e);
-    renderError(leaderboardBody);
+    renderErrorMsg(leaderboardBody);
   }
 }
 
@@ -157,20 +213,19 @@ function renderLeaderboard(board){
 
 async function openToday(){
   openModal(todayModal);
-  if(!apiConfigured()){
-    todayBody.innerHTML = '<p class="modal-error">لم يتم ربط الموقع بالبوت بعد.</p>';
+  if(!firebaseConfigured() || !firebaseReady){
+    todayBody.innerHTML = '<p class="modal-error">لم يتم ربط الموقع بقاعدة البيانات بعد.</p>';
     return;
   }
   renderLoading(todayBody);
   try{
     const date = getTodayDateStr();
-    const res = await fetch(BOT_API_URL.replace(/\/$/, '') + '/api/today?date=' + encodeURIComponent(date));
-    if(!res.ok) throw new Error('bad response');
-    const results = await res.json();
+    const snap = await db.collection('results').where('date', '==', date).get();
+    const results = snap.docs.map(doc => doc.data());
     renderToday(results);
   }catch(e){
     console.error('Failed to load today\'s results', e);
-    renderError(todayBody);
+    renderErrorMsg(todayBody);
   }
 }
 
@@ -230,19 +285,19 @@ function compareList(guessList, answerList){
 
   // Are the sets perfectly identical?
   const isIdentical = gSet.size === aSet.size && [...gSet].every(item => aSet.has(item));
-  
+
   if(isIdentical){
-    return 'green'; 
+    return 'green';
   }
-  
+
   // Is there any shared value at all?
   const hasOverlap = [...gSet].some(item => aSet.has(item));
-  
+
   if(hasOverlap){
     return 'yellow';
   }
-  
-  return 'red'; 
+
+  return 'red';
 }
 
 function compareGuess(guess){
@@ -273,9 +328,9 @@ function renderDots(){
     d.className = 'dot' + (i < state.guesses.length ? ' used' : '');
     attemptsDots.appendChild(d);
   }
-  
+
   const left = MAX_ATTEMPTS - state.guesses.length;
-  
+
   let attemptsText = '';
   if (left === 1) attemptsText = 'محاولة واحدة';
   else if (left === 2) attemptsText = 'محاولتان';
@@ -297,7 +352,7 @@ function renderRow(guessName){
   const nameCell = document.createElement('div');
   nameCell.className = 'cell name-cell';
   nameCell.textContent = person.name;
-  nameCell.setAttribute('data-label','الاسم'); // Fix: Hardcoded English removed
+  nameCell.setAttribute('data-label','الاسم');
   row.appendChild(nameCell);
 
   const fields = [
@@ -308,13 +363,12 @@ function renderRow(guessName){
     ['status', person.status]
   ];
 
-  // Fix: Translated 'Favorite' to 'المفضلة'
-  const labels = { 
-    joinYear:'سنة الانضمام', 
-    interest:'الاهتمامات', 
-    favorite:'المفضلة', 
-    chatActivity:'نشاط الدردشة', 
-    status:'الحالة' 
+  const labels = {
+    joinYear:'سنة الانضمام',
+    interest:'الاهتمامات',
+    favorite:'المفضلة',
+    chatActivity:'نشاط الدردشة',
+    status:'الحالة'
   };
 
   fields.forEach(([key, value]) => {
@@ -472,7 +526,7 @@ function submitGuess(name){
 }
 
 /* ============================================================
-   8. DISCORD-BOT-READY HOOK
+   8. RESULT EMISSION — Firestore write + optional Discord webhook
    ============================================================ */
 function getServerdleResult(){
   return {
@@ -490,23 +544,39 @@ window.getServerdleResult = getServerdleResult;
 function emitResult(){
   const detail = getServerdleResult();
   document.dispatchEvent(new CustomEvent('serverdle:finished', { detail }));
+  saveResultToFirestore(detail);
   sendResultToDiscord(detail);
 }
 
-async function sendResultToDiscord(detail){
-  if(!BOT_API_URL || BOT_API_URL.indexOf('PASTE_YOUR') !== -1) return;
-
+async function saveResultToFirestore(detail){
+  if(!firebaseConfigured() || !firebaseReady) return;
   try{
-    await fetch(BOT_API_URL.replace(/\/$/, '') + '/api/result', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-mafiadle-secret': BOT_API_SECRET
-      },
-      body: JSON.stringify(detail)
+    // Deterministic doc id => one result per user per day (upsert on retry/refresh).
+    const docId = `${detail.username}_${detail.date}`;
+    await db.collection('results').doc(docId).set({
+      ...detail,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   }catch(e){
-    console.error('Failed to send result to Mafiadle bot', e);
+    console.error('Failed to save result to Firestore', e);
+  }
+}
+
+async function sendResultToDiscord(detail){
+  if(!discordConfigured()) return;
+
+  const content = detail.won
+    ? `🎉 **${detail.username}** حل تحدي اليوم (${detail.date}) وعرف إنه **${detail.answer}** بمحاولة رقم ${detail.attemptsUsed}/${detail.maxAttempts}!`
+    : `❌ **${detail.username}** خسر تحدي اليوم (${detail.date}). الإجابة كانت **${detail.answer}**.`;
+
+  try{
+    await fetch(DISCORD_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content })
+    });
+  }catch(e){
+    console.error('Failed to send result to Discord webhook', e);
   }
 }
 
@@ -520,6 +590,14 @@ async function sendResultToDiscord(detail){
 const NO_REPEAT_WINDOW = 5;
 // Fixed reference point so the sequence is stable forever, for everyone.
 const GAME_START_DAY = Math.floor(Date.UTC(2025, 0, 1) / DAY_MS);
+
+// Manual overrides: force a specific date's answer to a specific member name,
+// regardless of what the RNG would have picked. Keyed by "YYYY-MM-DD".
+// Only takes effect the first time that date is ever locked in Firestore —
+// harmless to leave old entries here forever.
+const ANSWER_OVERRIDES = {
+  "2026-07-16": "اكرام"
+};
 
 // Small seeded PRNG (mulberry32) — same seed always gives same output,
 // which is what makes this "random but identical for every player".
@@ -552,10 +630,74 @@ function pickAnswerIndex(targetDayIndex, peopleCount){
 }
 
 /* ============================================================
+   9c. ANSWER LOCKING
+   The first time a given date is ever played, its answer is
+   written to Firestore ("answers/{date}") and locked forever.
+   Every subsequent load — even after members.json is edited —
+   reads that same locked answer back, so edits can never change
+   what a past or already-started day's answer was.
+   ============================================================ */
+function findByName(name){
+  const q = (name || '').trim().toLowerCase();
+  return people.find(p => p.name.trim().toLowerCase() === q);
+}
+
+async function resolveAnswer(dateStr){
+  // No Firestore configured — fall back to pure local computation (old behavior).
+  if(!firebaseConfigured() || !firebaseReady){
+    answerIndex = pickAnswerIndex(dayIndex, people.length);
+    answer = people[answerIndex];
+    return;
+  }
+
+  const docRef = db.collection('answers').doc(dateStr);
+
+  try{
+    const lockedName = await db.runTransaction(async (tx) => {
+      const doc = await tx.get(docRef);
+      if(doc.exists){
+        return doc.data().name; // already locked by an earlier play — use it as-is
+      }
+
+      // First time this date is being played: decide the answer once and lock it.
+      let chosenName;
+      if(ANSWER_OVERRIDES[dateStr] && findByName(ANSWER_OVERRIDES[dateStr])){
+        chosenName = findByName(ANSWER_OVERRIDES[dateStr]).name;
+      } else {
+        const idx = pickAnswerIndex(dayIndex, people.length);
+        chosenName = people[idx].name;
+      }
+
+      tx.set(docRef, {
+        name: chosenName,
+        dayIndex,
+        lockedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      return chosenName;
+    });
+
+    const found = findByName(lockedName);
+    if(found){
+      answer = found;
+    } else {
+      // Locked name no longer exists in members.json (e.g. removed) — safe fallback.
+      console.warn(`Locked answer "${lockedName}" not found in current members.json, falling back.`);
+      answerIndex = pickAnswerIndex(dayIndex, people.length);
+      answer = people[answerIndex];
+    }
+  }catch(e){
+    console.error('Failed to resolve locked answer, falling back to local computation', e);
+    answerIndex = pickAnswerIndex(dayIndex, people.length);
+    answer = people[answerIndex];
+  }
+}
+
+/* ============================================================
    9. INIT — fetch members.json, then set up the day's game
    ============================================================ */
 async function init(){
   initNameGate();
+  initFirebase();
 
   try{
     const res = await fetch('members.json');
@@ -568,15 +710,16 @@ async function init(){
   }
 
   dayIndex = Math.floor((Date.now() + TIMEZONE_OFFSET_MS) / DAY_MS);
-  answerIndex = pickAnswerIndex(dayIndex, people.length);
-  answer = people[answerIndex];
+  const dateStr = new Date(dayIndex * DAY_MS).toISOString().slice(0, 10);
+
+  await resolveAnswer(dateStr);
 
   state = loadState() || { dayIndex, guesses: [], finished: false, won: false };
 
   renderAll();
 }
 
-// Fix: Prevent DOM-null race conditions on load
+// Prevent DOM-null race conditions on load
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
