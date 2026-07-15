@@ -17,12 +17,12 @@ const NAME_KEY = "mafiadle_username";
    Leave apiKey as-is to disable all Firestore reads/writes.
    ============================================================ */
 const FIREBASE_CONFIG = {
-  apiKey: "PASTE_YOUR_API_KEY_HERE",
-  authDomain: "PASTE_YOUR_PROJECT.firebaseapp.com",
-  projectId: "PASTE_YOUR_PROJECT_ID",
-  storageBucket: "PASTE_YOUR_PROJECT.appspot.com",
-  messagingSenderId: "PASTE_YOUR_SENDER_ID",
-  appId: "PASTE_YOUR_APP_ID"
+  apiKey: "AIzaSyASkNRon6_0NyKtDLEd4PXLv4bnX5emziE",
+  authDomain: "mafiadle.firebaseapp.com",
+  projectId: "mafiadle",
+  storageBucket: "mafiadle.firebasestorage.app",
+  messagingSenderId: "792188053218",
+  appId: "1:792188053218:web:b5f4a0ece13710af55a0bb"
 };
 
 // Optional: Discord webhook URL (Server Settings → Integrations → Webhooks).
