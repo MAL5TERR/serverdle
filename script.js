@@ -6,7 +6,7 @@ let people = [];
 const DAY_MS = 86400000;
 const TIMEZONE_OFFSET_HOURS = 3; // GMT+3 — day resets at midnight in this timezone
 const TIMEZONE_OFFSET_MS = TIMEZONE_OFFSET_HOURS * 3600000;
-const MAX_ATTEMPTS = 6;
+const MAX_ATTEMPTS = 5;
 const STORAGE_KEY = "serverdle_state_v1";
 
 let dayIndex, answerIndex, answer;
@@ -91,8 +91,8 @@ function renderDots(){
   }
   const left = MAX_ATTEMPTS - state.guesses.length;
   attemptsLabel.textContent = state.finished
-    ? (state.won ? 'Solved!' : 'Out of attempts')
-    : `${left} attempt${left === 1 ? '' : 's'} left`;
+    ? (state.won ? 'تم الحل!' : 'انتهت المحاولات')
+    : `تبقّى ${left} محاولة${left === 1 ? '' : ''}`;
 }
 
 function renderRow(guessName){
@@ -117,7 +117,7 @@ function renderRow(guessName){
     ['status', person.status]
   ];
 
-  const labels = { joinYear:'Join Year', interest:'Interest', favorite:'Favorite', chatActivity:'Chat Activity', status:'Status' };
+  const labels = { joinYear:'سنة الانضمام', interest:'الاهتمامات', favorite:'Favorite', chatActivity:'نشاط الدردشة', status:'الحالة' };
 
   fields.forEach(([key, value]) => {
     const cell = document.createElement('div');
@@ -140,10 +140,10 @@ function renderMessage(){
   if(!state.finished) return;
 
   if(state.won){
-    message.textContent = `🎉 You win! The answer was ${answer.name}.`;
+    message.textContent = `🎉 فزت! الإجابة كانت ${answer.name}.`;
     message.classList.add('show','win');
   } else {
-    message.textContent = `❌ Out of guesses. The answer was ${answer.name}.`;
+    message.textContent = `❌ انتهت محاولاتك. الإجابة كانت ${answer.name}.`;
     message.classList.add('show','lose');
   }
 }
@@ -187,7 +187,7 @@ function renderDropdown(matches){
     const item = document.createElement('div');
     const already = isAlreadyGuessed(person.name);
     item.className = 'dropdown-item' + (already ? ' disabled' : '');
-    item.innerHTML = `<span>${person.name}</span>${already ? '<small>already guessed</small>' : ''}`;
+    item.innerHTML = `<span>${person.name}</span>${already ? '<small>تم تخمينه مسبقًا</small>' : ''}`;
     if(!already){
       item.addEventListener('click', () => submitGuess(person.name));
     }
@@ -349,7 +349,7 @@ async function init(){
     const res = await fetch('members.json');
     people = await res.json();
   }catch(err){
-    message.textContent = 'Failed to load members.json — check the file exists and you\'re running this on a server (not file://).';
+    message.textContent = 'تعذّر تحميل members.json — تأكد أن الملف موجود وأنك تشغّل الموقع عبر خادم (وليس عبر file://).';
     message.classList.add('show','lose');
     console.error(err);
     return;

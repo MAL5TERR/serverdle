@@ -1,52 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mafiadle — Guess the Member</title>
+<title>Mafiadle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="game">
   <header>
-    <div class="tag">Daily Challenge</div>
+    <div class="tag">تحدي اليوم</div>
     <h1>MAFIADLE</h1>
-    <p>Guess today's mystery member in 6 tries.</p>
+    <p>خمّن عضو اليوم الغامض خلال 5 محاولات.</p>
   </header>
 
   <div class="panel">
     <div class="search-wrap">
-      <input type="text" id="guessInput" placeholder="Type a name..." autocomplete="off">
+      <input type="text" id="guessInput" placeholder="اكتب اسمًا..." autocomplete="off">
       <div class="dropdown" id="dropdown"></div>
     </div>
 
     <div class="status-row">
       <div class="attempts-dots" id="attemptsDots"></div>
-      <div id="attemptsLabel">6 attempts left</div>
+      <div id="attemptsLabel">تبقّى 5 محاولات</div>
     </div>
 
     <div class="legend">
-      <span><span class="swatch green"></span> Exact match</span>
-      <span><span class="swatch yellow"></span> Close (±1 year / shared interest or favorite)</span>
-      <span><span class="swatch red"></span> No match</span>
+      <span><span class="swatch green"></span> تطابق تام</span>
+      <span><span class="swatch yellow"></span> قريب (±1 سنة / اهتمام أو مفضل مشترك)</span>
+      <span><span class="swatch red"></span> غير متطابق</span>
     </div>
   </div>
 
   <div class="panel">
     <div class="headers-row">
-      <div>Name</div>
-      <div>Join Year</div>
-      <div>Interest</div>
+      <div>الاسم</div>
+      <div>سنة الانضمام</div>
+      <div>الاهتمامات</div>
       <div>Favorite</div>
-      <div>Chat Activity</div>
-      <div>Status</div>
+      <div>نشاط الدردشة</div>
+      <div>الحالة</div>
     </div>
     <div class="board" id="board"></div>
     <div class="message" id="message"></div>
   </div>
 
-  <footer>Resets daily • Data loaded from members.json</footer>
+  <footer>يتجدد يوميًا • البيانات من members.json</footer>
 </div>
 
 <script src="script.js"></script>
