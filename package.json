@@ -1,0 +1,16 @@
+{
+  "name": "mafiadle-bot",
+  "version": "1.0.0",
+  "description": "Discord bot for the Mafiadle daily guessing game — leaderboard, streaks, and result announcements.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "deploy-commands": "node deploy-commands.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}

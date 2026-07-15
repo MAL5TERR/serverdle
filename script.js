@@ -8,9 +8,17 @@ const TIMEZONE_OFFSET_HOURS = 3; // GMT+3 — day resets at midnight in this tim
 const TIMEZONE_OFFSET_MS = TIMEZONE_OFFSET_HOURS * 3600000;
 const MAX_ATTEMPTS = 5;
 const STORAGE_KEY = "serverdle_state_v1";
+const NAME_KEY = "mafiadle_username";
+
+// URL of your hosted Mafiadle bot (see mafiadle-bot/README.md), e.g. "https://your-bot.up.railway.app"
+// Leave as-is to disable sending results.
+const BOT_API_URL = "PASTE_YOUR_BOT_URL_HERE";
+// Must match API_SECRET in the bot's .env — stops randoms from posting fake results.
+const BOT_API_SECRET = "PASTE_YOUR_SHARED_SECRET_HERE";
 
 let dayIndex, answerIndex, answer;
 let state;
+let currentUsername = null;
 
 /* ============================================================
    2. DOM REFERENCES
@@ -21,6 +29,47 @@ const board = document.getElementById('board');
 const message = document.getElementById('message');
 const attemptsDots = document.getElementById('attemptsDots');
 const attemptsLabel = document.getElementById('attemptsLabel');
+const nameGate = document.getElementById('nameGate');
+const nameInput = document.getElementById('nameInput');
+const nameSubmit = document.getElementById('nameSubmit');
+
+/* ============================================================
+   2b. NAME GATE — ask once per browser, remember after that
+   ============================================================ */
+function getSavedUsername(){
+  try{ return localStorage.getItem(NAME_KEY); }catch(e){ return null; }
+}
+
+function saveUsername(name){
+  try{ localStorage.setItem(NAME_KEY, name); }catch(e){}
+}
+
+function submitName(){
+  const val = nameInput.value.trim();
+  if(!val) return;
+  currentUsername = val;
+  saveUsername(val);
+  nameGate.classList.remove('show');
+}
+
+function initNameGate(){
+  const saved = getSavedUsername();
+  if(saved){
+    currentUsername = saved;
+    nameGate.classList.remove('show');
+    return;
+  }
+  nameGate.classList.add('show');
+  nameInput.focus();
+}
+
+nameSubmit.addEventListener('click', submitName);
+nameInput.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    submitName();
+  }
+});
 
 /* ============================================================
    3. STATE PERSISTENCE
@@ -48,17 +97,24 @@ function saveState(){
    4. COMPARISON LOGIC
    ============================================================ */
 function compareList(guessList, answerList){
-  const g = guessList || [];
-  const a = answerList || [];
-  const overlap = g.filter(i => a.includes(i));
+  const gSet = new Set(guessList || []);
+  const aSet = new Set(answerList || []);
 
-  if(g.length === a.length && overlap.length === a.length){
-    return 'green'; // identical sets
-  } else if(overlap.length > 0){
-    return 'yellow'; // at least one shared value
-  } else {
-    return 'red'; // no overlap at all
+  // Are the sets perfectly identical?
+  const isIdentical = gSet.size === aSet.size && [...gSet].every(item => aSet.has(item));
+  
+  if(isIdentical){
+    return 'green'; 
   }
+  
+  // Is there any shared value at all?
+  const hasOverlap = [...gSet].some(item => aSet.has(item));
+  
+  if(hasOverlap){
+    return 'yellow';
+  }
+  
+  return 'red'; 
 }
 
 function compareGuess(guess){
@@ -89,10 +145,17 @@ function renderDots(){
     d.className = 'dot' + (i < state.guesses.length ? ' used' : '');
     attemptsDots.appendChild(d);
   }
+  
   const left = MAX_ATTEMPTS - state.guesses.length;
+  
+  let attemptsText = '';
+  if (left === 1) attemptsText = 'محاولة واحدة';
+  else if (left === 2) attemptsText = 'محاولتان';
+  else attemptsText = `${left} محاولات`;
+
   attemptsLabel.textContent = state.finished
     ? (state.won ? 'تم الحل!' : 'انتهت المحاولات')
-    : `تبقّى ${left} محاولة${left === 1 ? '' : ''}`;
+    : `تبقّى ${attemptsText}`;
 }
 
 function renderRow(guessName){
@@ -106,7 +169,7 @@ function renderRow(guessName){
   const nameCell = document.createElement('div');
   nameCell.className = 'cell name-cell';
   nameCell.textContent = person.name;
-  nameCell.setAttribute('data-label','Name');
+  nameCell.setAttribute('data-label','الاسم'); // Fix: Hardcoded English removed
   row.appendChild(nameCell);
 
   const fields = [
@@ -117,7 +180,14 @@ function renderRow(guessName){
     ['status', person.status]
   ];
 
-  const labels = { joinYear:'سنة الانضمام', interest:'الاهتمامات', favorite:'Favorite', chatActivity:'نشاط الدردشة', status:'الحالة' };
+  // Fix: Translated 'Favorite' to 'المفضلة'
+  const labels = { 
+    joinYear:'سنة الانضمام', 
+    interest:'الاهتمامات', 
+    favorite:'المفضلة', 
+    chatActivity:'نشاط الدردشة', 
+    status:'الحالة' 
+  };
 
   fields.forEach(([key, value]) => {
     const cell = document.createElement('div');
@@ -279,6 +349,7 @@ function submitGuess(name){
 function getServerdleResult(){
   return {
     date: new Date(dayIndex * DAY_MS).toISOString().slice(0,10),
+    username: currentUsername || 'مجهول',
     answer: answer.name,
     won: state.won,
     attemptsUsed: state.guesses.length,
@@ -291,13 +362,24 @@ window.getServerdleResult = getServerdleResult;
 function emitResult(){
   const detail = getServerdleResult();
   document.dispatchEvent(new CustomEvent('serverdle:finished', { detail }));
+  sendResultToDiscord(detail);
+}
 
-  // Example (disabled by default) for future backend integration:
-  // fetch('https://your-discord-bot-endpoint.example.com/api/result', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify(detail)
-  // });
+async function sendResultToDiscord(detail){
+  if(!BOT_API_URL || BOT_API_URL.indexOf('PASTE_YOUR') !== -1) return;
+
+  try{
+    await fetch(BOT_API_URL.replace(/\/$/, '') + '/api/result', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-mafiadle-secret': BOT_API_SECRET
+      },
+      body: JSON.stringify(detail)
+    });
+  }catch(e){
+    console.error('Failed to send result to Mafiadle bot', e);
+  }
 }
 
 /* ============================================================
@@ -345,6 +427,8 @@ function pickAnswerIndex(targetDayIndex, peopleCount){
    9. INIT — fetch members.json, then set up the day's game
    ============================================================ */
 async function init(){
+  initNameGate();
+
   try{
     const res = await fetch('members.json');
     people = await res.json();
@@ -364,4 +448,9 @@ async function init(){
   renderAll();
 }
 
-init();
+// Fix: Prevent DOM-null race conditions on load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
