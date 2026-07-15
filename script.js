@@ -127,7 +127,7 @@ function renderRow(guessName){
     row.appendChild(cell);
   });
 
-  board.appendChild(row);
+  board.insertBefore(row, board.firstChild);
 }
 
 function renderBoard(){
