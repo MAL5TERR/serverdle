@@ -312,3 +312,213 @@ footer{
     margin-left: 8px;
   }
 }
+
+/* ============================================================
+   NAME GATE — shown once per browser until a name is saved
+   ============================================================ */
+.name-gate{
+  position: fixed;
+  inset: 0;
+  background: rgba(5,6,5,0.86);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.name-gate.show{ display: flex; }
+
+.name-gate-box{
+  width: 100%;
+  max-width: 380px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  animation: reveal 0.25s ease;
+}
+
+.name-gate-box h2{
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.name-gate-box .warn{
+  margin: 0 0 18px;
+  font-size: 13px;
+  color: var(--yellow);
+  font-weight: 600;
+}
+
+.name-gate-box input{
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 15px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  outline: none;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.name-gate-box input:focus{
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(57,255,106,0.18);
+}
+
+.name-gate-box button{
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-weight: 700;
+  background: var(--accent-2);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  color: #06210f;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.name-gate-box button:hover{
+  filter: brightness(1.1);
+}
+
+/* ============================================================
+   STATS BUTTONS + MODALS (leaderboard / today's results)
+   ============================================================ */
+.stats-buttons{
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.stats-btn{
+  flex: 1;
+  min-width: 160px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.stats-btn:hover{
+  border-color: var(--accent);
+  background: rgba(57,255,106,0.08);
+}
+
+.modal{
+  position: fixed;
+  inset: 0;
+  background: rgba(5,6,5,0.86);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.modal.show{ display: flex; }
+
+.modal-box{
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  animation: reveal 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.modal-head h2{
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.modal-close{
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.modal-close:hover{
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.modal-body{
+  overflow-y: auto;
+}
+
+.modal-loading, .modal-error, .modal-empty{
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 20px 0;
+}
+
+.modal-error{ color: var(--red); }
+
+.stats-table{
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.stats-table th{
+  text-align: right;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.stats-table td{
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+
+.stats-table tr:last-child td{ border-bottom: none; }
+
+.stats-table td.rank{
+  color: var(--muted);
+  font-weight: 700;
+  width: 24px;
+}
+
+.stats-table td.result-win{ color: #baffce; }
+.stats-table td.result-loss{ color: #ffc2c2; }

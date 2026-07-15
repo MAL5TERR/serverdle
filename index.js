@@ -111,5 +111,18 @@ app.post('/api/result', async (req, res) => {
   res.json({ ok: true });
 });
 
+// Read-only — powers the "all-time leaderboard" button on the website.
+app.get('/api/leaderboard', (req, res) => {
+  res.json(store.getLeaderboard());
+});
+
+// Read-only — powers the "today's results" button on the website.
+// ?date=YYYY-MM-DD must match the date format the site's own game logic uses.
+app.get('/api/today', (req, res) => {
+  const date = req.query.date;
+  if(!date) return res.status(400).json({ error: 'missing date query param' });
+  res.json(store.getResultsForDate(date));
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`📡 API listening on port ${PORT}`));

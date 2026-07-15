@@ -10,6 +10,16 @@
 </head>
 <body>
 
+<!-- Name gate: shown once per browser until a name is saved -->
+<div class="name-gate show" id="nameGate">
+  <div class="name-gate-box">
+    <h2>اكتب اسمك</h2>
+    <p class="warn">لاتسوي ابو فله وتكتب اسم غيرك</p>
+    <input type="text" id="nameInput" placeholder="اسمك..." autocomplete="off" maxlength="30">
+    <button id="nameSubmit">دخول</button>
+  </div>
+</div>
+
 <div class="game">
   <header>
     <div class="tag">تحدي اليوم</div>
@@ -32,6 +42,37 @@
       <span><span class="swatch green"></span> تطابق تام</span>
       <span><span class="swatch yellow"></span> قريب (±1 سنة / اهتمام أو مفضل مشترك)</span>
       <span><span class="swatch red"></span> غير متطابق</span>
+    </div>
+
+    <div class="stats-buttons">
+      <button id="leaderboardBtn" class="stats-btn">🏆 الترتيب العام</button>
+      <button id="todayBtn" class="stats-btn">📅 نتائج اليوم</button>
+    </div>
+  </div>
+
+  <!-- All-time leaderboard modal -->
+  <div class="modal" id="leaderboardModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2>🏆 الترتيب العام</h2>
+        <button class="modal-close" data-close="leaderboardModal">✕</button>
+      </div>
+      <div class="modal-body" id="leaderboardBody">
+        <p class="modal-loading">جارِ التحميل...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Today's results modal -->
+  <div class="modal" id="todayModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2>📅 نتائج اليوم</h2>
+        <button class="modal-close" data-close="todayModal">✕</button>
+      </div>
+      <div class="modal-body" id="todayBody">
+        <p class="modal-loading">جارِ التحميل...</p>
+      </div>
     </div>
   </div>
 

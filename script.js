@@ -33,6 +33,13 @@ const nameGate = document.getElementById('nameGate');
 const nameInput = document.getElementById('nameInput');
 const nameSubmit = document.getElementById('nameSubmit');
 
+const leaderboardBtn = document.getElementById('leaderboardBtn');
+const todayBtn = document.getElementById('todayBtn');
+const leaderboardModal = document.getElementById('leaderboardModal');
+const todayModal = document.getElementById('todayModal');
+const leaderboardBody = document.getElementById('leaderboardBody');
+const todayBody = document.getElementById('todayBody');
+
 /* ============================================================
    2b. NAME GATE — ask once per browser, remember after that
    ============================================================ */
@@ -70,6 +77,127 @@ nameInput.addEventListener('keydown', (e) => {
     submitName();
   }
 });
+
+/* ============================================================
+   2c. STATS MODALS — all-time leaderboard & today's results
+   ============================================================ */
+function getTodayDateStr(){
+  const idx = Math.floor((Date.now() + TIMEZONE_OFFSET_MS) / DAY_MS);
+  return new Date(idx * DAY_MS).toISOString().slice(0, 10);
+}
+
+function apiConfigured(){
+  return BOT_API_URL && BOT_API_URL.indexOf('PASTE_YOUR') === -1;
+}
+
+function openModal(modal){ modal.classList.add('show'); }
+function closeModal(modal){ modal.classList.remove('show'); }
+
+document.querySelectorAll('.modal-close').forEach(btn => {
+  btn.addEventListener('click', () => {
+    closeModal(document.getElementById(btn.dataset.close));
+  });
+});
+
+document.querySelectorAll('.modal').forEach(modal => {
+  modal.addEventListener('click', (e) => {
+    if(e.target === modal) closeModal(modal); // click outside the box closes it
+  });
+});
+
+function renderLoading(container){
+  container.innerHTML = '<p class="modal-loading">جارِ التحميل...</p>';
+}
+
+function renderError(container){
+  container.innerHTML = '<p class="modal-error">تعذّر تحميل البيانات. تأكد أن رابط البوت مضبوط بشكل صحيح.</p>';
+}
+
+async function openLeaderboard(){
+  openModal(leaderboardModal);
+  if(!apiConfigured()){
+    leaderboardBody.innerHTML = '<p class="modal-error">لم يتم ربط الموقع بالبوت بعد.</p>';
+    return;
+  }
+  renderLoading(leaderboardBody);
+  try{
+    const res = await fetch(BOT_API_URL.replace(/\/$/, '') + '/api/leaderboard');
+    if(!res.ok) throw new Error('bad response');
+    const board = await res.json();
+    renderLeaderboard(board);
+  }catch(e){
+    console.error('Failed to load leaderboard', e);
+    renderError(leaderboardBody);
+  }
+}
+
+function renderLeaderboard(board){
+  if(!board || board.length === 0){
+    leaderboardBody.innerHTML = '<p class="modal-empty">لا توجد نتائج مسجلة بعد.</p>';
+    return;
+  }
+  const rows = board.map((u, i) => `
+    <tr>
+      <td class="rank">${i + 1}</td>
+      <td>${u.username}</td>
+      <td>${u.wins}/${u.played}</td>
+      <td>${u.winRate}%</td>
+      <td>${u.avgAttempts ?? '—'}</td>
+    </tr>
+  `).join('');
+  leaderboardBody.innerHTML = `
+    <table class="stats-table">
+      <thead>
+        <tr><th></th><th>الاسم</th><th>الفوز/اللعب</th><th>النسبة</th><th>متوسط المحاولات</th></tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+async function openToday(){
+  openModal(todayModal);
+  if(!apiConfigured()){
+    todayBody.innerHTML = '<p class="modal-error">لم يتم ربط الموقع بالبوت بعد.</p>';
+    return;
+  }
+  renderLoading(todayBody);
+  try{
+    const date = getTodayDateStr();
+    const res = await fetch(BOT_API_URL.replace(/\/$/, '') + '/api/today?date=' + encodeURIComponent(date));
+    if(!res.ok) throw new Error('bad response');
+    const results = await res.json();
+    renderToday(results);
+  }catch(e){
+    console.error('Failed to load today\'s results', e);
+    renderError(todayBody);
+  }
+}
+
+function renderToday(results){
+  if(!results || results.length === 0){
+    todayBody.innerHTML = '<p class="modal-empty">ماحد لعب تحدي اليوم بعد.</p>';
+    return;
+  }
+  const rows = results.map(r => `
+    <tr>
+      <td>${r.username}</td>
+      <td class="${r.won ? 'result-win' : 'result-loss'}">${r.won ? '✅ فاز' : '❌ خسر'}</td>
+      <td>${r.attemptsUsed}/${r.maxAttempts}</td>
+    </tr>
+  `).join('');
+  todayBody.innerHTML = `
+    <table class="stats-table">
+      <thead>
+        <tr><th>الاسم</th><th>النتيجة</th><th>المحاولات</th></tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+leaderboardBtn.addEventListener('click', openLeaderboard);
+todayBtn.addEventListener('click', openToday);
 
 /* ============================================================
    3. STATE PERSISTENCE
