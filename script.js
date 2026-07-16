@@ -7,7 +7,7 @@ const DAY_MS = 86400000;
 const TIMEZONE_OFFSET_HOURS = 3; // GMT+3 — day resets at midnight in this timezone
 const TIMEZONE_OFFSET_MS = TIMEZONE_OFFSET_HOURS * 3600000;
 const MAX_ATTEMPTS = 5;
-const STORAGE_KEY = "serverdle_state_v1";
+const STORAGE_KEY = "serverdle_state_v2";
 const NAME_KEY = "mafiadle_username";
 
 /* ============================================================
