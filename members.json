@@ -6,7 +6,7 @@
   { "name": "عزو",    "joinYear": 2020, "interest": ["أنمي","ألعاب","مسلسلات","أفلام"], "favorite": ["JoJo","League of Legends"],                            "chatActivity": "متفاعل",   "status": "نشط" },
   { "name": "يسبجا",    "joinYear": 2020, "interest": ["أنمي","ألعاب","مسلسلات"],        "favorite": ["JoJo","Bloodborne"],                                   "chatActivity": "متفاعل",   "status": "نشط" },
   { "name": "يوكينيا",   "joinYear": 2020, "interest": ["أنمي","ألعاب"],                 "favorite": ["Bungou Stray Dogs"],                                   "chatActivity": "متفاعل",   "status": "غادر" },
-  { "name": "سفاري",   "joinYear": 2021, "interest": ["أنمي","ألعاب"],                 "favorite": ["The House in Fata Morgana"],                           "chatActivity": "متفاعل",   "status": "غادر" },
+  { "name": "سفاري",   "joinYear": 2021, "interest": ["أنمي","ألعاب"],                 "favorite": ["The House in Fata Morgana", "Kaguya-sama"],                           "chatActivity": "متفاعل",   "status": "غادر" },
   { "name": "زبادي",    "joinYear": 2020, "interest": ["أنمي","ألعاب","مسلسلات"],        "favorite": ["Minecraft"],                                           "chatActivity": "غير نشط", "status": "نشط" },
   { "name": "سراج",     "joinYear": 2023, "interest": ["أنمي","ألعاب"],                  "favorite": ["JoJo","Dead Cells"],                                   "chatActivity": "متفاعل",   "status": "محظور" },
   { "name": "امين",     "joinYear": 2020, "interest": ["أنمي","ألعاب"],                  "favorite": ["Getting Over It"],                                     "chatActivity": "أحياناً",   "status": "نشط" },
