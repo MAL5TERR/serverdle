@@ -391,6 +391,19 @@ footer{
   filter: brightness(1.1);
 }
 
+.name-gate-box #nameCancel{
+  margin-top: 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.name-gate-box #nameCancel:hover{
+  border-color: var(--red);
+  color: var(--red);
+  filter: none;
+}
+
 /* ============================================================
    STATS BUTTONS + MODALS (leaderboard / today's results)
    ============================================================ */

@@ -11,12 +11,13 @@
 <body>
 
 <!-- Name gate: shown once per browser until a name is saved -->
-<div class="name-gate show" id="nameGate">
+<div class="name-gate" id="nameGate">
   <div class="name-gate-box">
     <h2>اكتب اسمك</h2>
     <p class="warn">لاتسوي ابو فله وتكتب اسم غيرك</p>
     <input type="text" id="nameInput" placeholder="اسمك..." autocomplete="off" maxlength="30">
     <button id="nameSubmit">دخول</button>
+    <button id="nameCancel" style="display:none;">إلغاء</button>
   </div>
 </div>
 
@@ -47,6 +48,7 @@
     <div class="stats-buttons">
       <button id="leaderboardBtn" class="stats-btn">🏆 الترتيب العام</button>
       <button id="todayBtn" class="stats-btn">📅 نتائج اليوم</button>
+      <button id="changeUserBtn" class="stats-btn">👤 تغيير الاسم</button>
     </div>
   </div>
 

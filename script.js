@@ -69,9 +69,13 @@ const attemptsLabel = document.getElementById('attemptsLabel');
 const nameGate = document.getElementById('nameGate');
 const nameInput = document.getElementById('nameInput');
 const nameSubmit = document.getElementById('nameSubmit');
+const nameCancel = document.getElementById('nameCancel');
+const changeUserBtn = document.getElementById('changeUserBtn');
 
 const leaderboardBtn = document.getElementById('leaderboardBtn');
 const todayBtn = document.getElementById('todayBtn');
+const changeUserBtn = document.getElementById('changeUserBtn');
+const changeUserBtn = document.getElementById('changeUserBtn');
 const leaderboardModal = document.getElementById('leaderboardModal');
 const todayModal = document.getElementById('todayModal');
 const leaderboardBody = document.getElementById('leaderboardBody');
@@ -88,12 +92,29 @@ function saveUsername(name){
   try{ localStorage.setItem(NAME_KEY, name); }catch(e){}
 }
 
+let isChangingName = false;
+
 function submitName(){
   const val = nameInput.value.trim();
   if(!val) return;
+
+  const oldName = currentUsername;
   currentUsername = val;
   saveUsername(val);
   nameGate.classList.remove('show');
+
+  // If this was a rename (not first-time setup) and the name actually changed,
+  // migrate all of their existing Firestore results docs to the new name so
+  // the leaderboard and today's-results reflect it too.
+  if(isChangingName && oldName && oldName !== val){
+    migrateUsername(oldName, val);
+  }
+  isChangingName = false;
+}
+
+function cancelNameChange(){
+  nameGate.classList.remove('show');
+  isChangingName = false;
 }
 
 function initNameGate(){
@@ -103,17 +124,70 @@ function initNameGate(){
     nameGate.classList.remove('show');
     return;
   }
+  isChangingName = false;
+  nameCancel.style.display = 'none';
   nameGate.classList.add('show');
   nameInput.focus();
 }
 
+function openChangeUserGate(){
+  isChangingName = true;
+  nameInput.value = currentUsername || '';
+  nameCancel.style.display = 'block';
+  nameGate.classList.add('show');
+  nameInput.focus();
+  nameInput.select();
+}
+
+// Renames every one of this user's stored results docs from oldName to newName
+// (results are keyed as "username_date", so each doc needs a new id).
+async function migrateUsername(oldName, newName){
+  if(!firebaseConfigured() || !firebaseReady) return;
+  try{
+    const snap = await db.collection('results').where('username', '==', oldName).get();
+    if(snap.empty) return;
+
+    const batch = db.batch();
+    snap.forEach(doc => {
+      const data = doc.data();
+      const newId = `${newName}_${data.date}`;
+      batch.set(db.collection('results').doc(newId), { ...data, username: newName });
+      batch.delete(doc.ref);
+    });
+    await batch.commit();
+  }catch(e){
+    console.error('Failed to migrate username in Firestore', e);
+  }
+}
+
 nameSubmit.addEventListener('click', submitName);
+nameCancel.addEventListener('click', cancelNameChange);
+changeUserBtn.addEventListener('click', openChangeUserGate);
 nameInput.addEventListener('keydown', (e) => {
   if(e.key === 'Enter'){
     e.preventDefault();
     submitName();
+  } else if(e.key === 'Escape' && isChangingName){
+    cancelNameChange();
   }
 });
+
+function changeUser(){
+  const prevName = currentUsername || '';
+  nameInput.value = prevName;
+  nameGate.classList.add('show');
+  nameInput.focus();
+  nameInput.select();
+}
+
+changeUserBtn.addEventListener('click', changeUser);
+
+function openChangeUser(){
+  nameInput.value = currentUsername || '';
+  nameGate.classList.add('show');
+  nameInput.focus();
+  nameInput.select();
+}
 
 /* ============================================================
    2c. STATS MODALS — all-time leaderboard & today's results
@@ -253,6 +327,7 @@ function renderToday(results){
 
 leaderboardBtn.addEventListener('click', openLeaderboard);
 todayBtn.addEventListener('click', openToday);
+changeUserBtn.addEventListener('click', openChangeUser);
 
 /* ============================================================
    3. STATE PERSISTENCE
