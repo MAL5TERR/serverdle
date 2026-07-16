@@ -74,8 +74,6 @@ const changeUserBtn = document.getElementById('changeUserBtn');
 
 const leaderboardBtn = document.getElementById('leaderboardBtn');
 const todayBtn = document.getElementById('todayBtn');
-const changeUserBtn = document.getElementById('changeUserBtn');
-const changeUserBtn = document.getElementById('changeUserBtn');
 const leaderboardModal = document.getElementById('leaderboardModal');
 const todayModal = document.getElementById('todayModal');
 const leaderboardBody = document.getElementById('leaderboardBody');
