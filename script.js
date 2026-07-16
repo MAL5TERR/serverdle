@@ -596,7 +596,6 @@ const GAME_START_DAY = Math.floor(Date.UTC(2025, 0, 1) / DAY_MS);
 // Only takes effect the first time that date is ever locked in Firestore —
 // harmless to leave old entries here forever.
 const ANSWER_OVERRIDES = {
-  "2026-07-16": "اكرام"
 };
 
 // Small seeded PRNG (mulberry32) — same seed always gives same output,
