@@ -79,6 +79,10 @@ const todayModal = document.getElementById('todayModal');
 const leaderboardBody = document.getElementById('leaderboardBody');
 const todayBody = document.getElementById('todayBody');
 
+// Lock the stats buttons by default until we know today's finished-state.
+leaderboardBtn.disabled = true;
+todayBtn.disabled = true;
+
 /* ============================================================
    2b. NAME GATE — ask once per browser, remember after that
    ============================================================ */
@@ -189,10 +193,27 @@ function openChangeUser(){
 
 /* ============================================================
    2c. STATS MODALS — all-time leaderboard & today's results
+   Both are locked until the player finishes TODAY's challenge.
+   Because `state` is reloaded/reset per dayIndex (see loadState),
+   this lock re-engages automatically every new day — finishing
+   yesterday's challenge does not carry over.
    ============================================================ */
 function getTodayDateStr(){
   const idx = Math.floor((Date.now() + TIMEZONE_OFFSET_MS) / DAY_MS);
   return new Date(idx * DAY_MS).toISOString().slice(0, 10);
+}
+
+function isTodayFinished(){
+  return !!(state && state.finished);
+}
+
+function updateStatsButtonsLock(){
+  const locked = !isTodayFinished();
+  [leaderboardBtn, todayBtn].forEach(btn => {
+    btn.disabled = locked;
+    btn.classList.toggle('locked', locked);
+    btn.title = locked ? 'أنهِ تحدي اليوم أولاً عشان تشوف النتائج' : '';
+  });
 }
 
 function openModal(modal){ modal.classList.add('show'); }
@@ -219,6 +240,7 @@ function renderErrorMsg(container){
 }
 
 async function openLeaderboard(){
+  if(!isTodayFinished()) return; // locked until today's challenge is done
   openModal(leaderboardModal);
   if(!firebaseConfigured() || !firebaseReady){
     leaderboardBody.innerHTML = '<p class="modal-error">لم يتم ربط الموقع بقاعدة البيانات بعد.</p>';
@@ -284,6 +306,7 @@ function renderLeaderboard(board){
 }
 
 async function openToday(){
+  if(!isTodayFinished()) return; // locked until today's challenge is done
   openModal(todayModal);
   if(!firebaseConfigured() || !firebaseReady){
     todayBody.innerHTML = '<p class="modal-error">لم يتم ربط الموقع بقاعدة البيانات بعد.</p>';
@@ -475,6 +498,7 @@ function renderMessage(){
 
 function renderLockState(){
   input.disabled = state.finished;
+  updateStatsButtonsLock();
 }
 
 function renderAll(){
